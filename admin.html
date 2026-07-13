@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<!-- ═══════════════════════════════════════════════════════════════
+     RIPS CLOSET — ADMIN PANEL (admin.html)
+     This page is for YOU + your partner only.
+     It adds items to the store two ways:
+
+     ⚡ INSTANT PUBLISH — one-time setup with a free GitHub "token"
+        (instructions are inside the page). After that, adding an
+        item, marking sold, or deleting is ONE TAP.
+
+     ✍️ MANUAL MODE — no setup. The page writes the code + preps the
+        photo for you, and shows exact steps to paste it on GitHub.
+
+     You should not need to edit this file. Passwords → products.js
+     ═══════════════════════════════════════════════════════════════ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIPS CLOSET — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--green:#3ddd00;--black:#060606;--card:#0d0d0d;--line:#222;--dim:#9a9a9a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--black);color:#f2f2f2;font-family:'Barlow Condensed',sans-serif;min-height:100vh}
+  ::selection{background:var(--green);color:#000}
+  h1,h2{font-family:'Bebas Neue',sans-serif;letter-spacing:.05em;font-weight:400}
+  .wrap{max-width:680px;margin:0 auto;padding:28px 16px 80px}
+
+  /* gate */
+  #gate{position:fixed;inset:0;z-index:50;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+  #gate h1{font-size:56px}#gate h1 span{color:var(--green);text-shadow:0 0 20px rgba(61,221,0,.5)}
+  #gate p{color:var(--dim);letter-spacing:.3em;font-size:12px;text-transform:uppercase;margin:8px 0 30px}
+  #gate input{width:100%;max-width:300px;padding:15px;text-align:center;background:#0c0c0c;border:1px solid #262626;border-radius:6px;color:#fff;font-size:19px;letter-spacing:.3em;font-family:inherit;outline:none}
+  #gate input:focus{border-color:var(--green)}
+  #gate button{width:100%;max-width:300px;margin-top:12px;padding:15px;background:var(--green);border:none;border-radius:6px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:.12em;color:#031000}
+  #gateErr{color:#ff5d5d;margin-top:12px;min-height:20px;font-weight:600;letter-spacing:.08em}
+
+  .head{text-align:center;margin-bottom:26px}
+  .head h1{font-size:52px}.head h1 span{color:var(--green);text-shadow:0 0 20px rgba(61,221,0,.5)}
+  .head p{color:var(--dim);letter-spacing:.28em;font-size:12px;text-transform:uppercase}
+  .head a{color:var(--green);font-size:15px;letter-spacing:.08em;text-decoration:none}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px}
+  .panel h2{font-size:26px;color:var(--green);margin-bottom:14px}
+  label{display:block;font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:14px 0 6px}
+  input[type=text],input[type=password]{width:100%;padding:13px;background:#080808;border:1px solid #262626;border-radius:6px;color:#fff;font-size:18px;font-family:inherit;outline:none}
+  input:focus{border-color:var(--green)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .check{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:17px}
+  .check input{width:20px;height:20px;accent-color:var(--green)}
+
+  .photo{margin-top:14px;border:2px dashed #2c2c2c;border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:border-color .15s}
+  .photo:hover{border-color:var(--green)}
+  .photo img{max-width:100%;max-height:260px;border-radius:8px;display:block;margin:0 auto 10px}
+  .photo span{color:var(--dim);font-size:16px;letter-spacing:.06em}
+
+  .btn{display:block;width:100%;margin-top:16px;padding:15px;border:none;border-radius:7px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:.12em;transition:all .15s;text-align:center;text-decoration:none}
+  .btn.green{background:var(--green);color:#031000;box-shadow:0 0 20px rgba(61,221,0,.25)}
+  .btn.green:hover{box-shadow:0 0 34px rgba(61,221,0,.45)}
+  .btn.ghost{background:transparent;color:var(--green);border:1px solid rgba(61,221,0,.6)}
+  .btn.ghost:hover{background:rgba(61,221,0,.08)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  .msg{margin-top:14px;padding:12px 14px;border-radius:7px;font-size:16px;line-height:1.5;display:none}
+  .msg.ok{display:block;background:rgba(61,221,0,.1);border:1px solid rgba(61,221,0,.4);color:#b9ffa0}
+  .msg.err{display:block;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.4);color:#ffb0b0}
+
+  details{margin-top:14px}
+  summary{cursor:pointer;color:var(--green);font-size:16px;letter-spacing:.06em;font-weight:600}
+  .steps{margin:12px 0 4px 20px;color:#d8d8d8;font-size:16.5px;line-height:1.75}
+  .steps b{color:var(--green)}
+  code,textarea.code{background:#000;border:1px solid #262626;border-radius:6px;color:#b9ffa0;font-family:ui-monospace,Menlo,monospace}
+  code{padding:1px 7px;font-size:14px}
+  textarea.code{width:100%;min-height:210px;padding:12px;font-size:13px;line-height:1.5;margin-top:10px;white-space:pre;outline:none}
+
+  .item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #1a1a1a}
+  .item:last-child{border-bottom:none}
+  .item img{width:52px;height:52px;object-fit:cover;border-radius:6px;background:#151515}
+  .item .t{flex:1;min-width:0}
+  .item .t b{display:block;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .t small{color:var(--dim);font-size:14px;letter-spacing:.05em}
+  .item .sold-badge{color:#ff6b6b;font-weight:700;font-size:13px;letter-spacing:.1em}
+  .mini{padding:8px 12px;border-radius:6px;border:1px solid #2e2e2e;background:#111;color:#eee;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.08em;white-space:nowrap}
+  .mini:hover{border-color:var(--green);color:var(--green)}
+  .mini.danger:hover{border-color:#ff5d5d;color:#ff5d5d}
+  .hidden{display:none !important}
+  .note{color:var(--dim);font-size:15px;line-height:1.6;margin-top:8px}
+  .note a{color:var(--green)}
+</style>
+</head>
+<body>
+
+<!-- ═══ ADMIN LOGIN ═══ -->
+<div id="gate">
+  <h1>RIPS <span>ADMIN</span></h1>
+  <p>Staff only</p>
+  <input id="gateInput" type="password" placeholder="ADMIN PASSWORD" autocomplete="off">
+  <button id="gateBtn">LOG IN</button>
+  <div id="gateErr"></div>
+</div>
+
+<div class="wrap hidden" id="app">
+  <div class="head">
+    <h1>RIPS <span>ADMIN</span></h1>
+    <p>Add drops · flip sold · run the closet</p>
+    <a href="index.html" target="_blank">↗ view the live store</a>
+  </div>
+
+  <!-- ═══ ADD ITEM ═══ -->
+  <div class="panel">
+    <h2>➕ Add a New Item</h2>
+
+    <label>Item name</label>
+    <input type="text" id="fName" placeholder="Supreme Box Logo Hoodie">
+
+    <div class="row">
+      <div>
+        <label>Price</label>
+        <input type="text" id="fPrice" placeholder="$220">
+      </div>
+      <div>
+        <label>Size (optional)</label>
+        <input type="text" id="fSize" placeholder="L">
+      </div>
+    </div>
+
+    <label>Condition (optional)</label>
+    <input type="text" id="fCond" placeholder="9/10  or  DS / New">
+
+    <label>Photo</label>
+    <div class="photo" id="photoDrop">
+      <img id="photoPreview" class="hidden" alt="">
+      <span id="photoHint">📸 Tap to choose a photo</span>
+      <input type="file" id="fPhoto" accept="image/*" class="hidden">
+    </div>
+
+    <div class="check">
+      <input type="checkbox" id="fSold"><label for="fSold" style="margin:0">Already sold out (shows the SOLD stamp)</label>
+    </div>
+
+    <!-- Instant publish (needs one-time GitHub setup below) -->
+    <button class="btn green" id="btnPublish">⚡ PUBLISH TO SITE</button>
+
+    <!-- Manual fallback -->
+    <button class="btn ghost" id="btnManual">✍️ MANUAL MODE (NO SETUP)</button>
+
+    <div class="msg" id="addMsg"></div>
+
+    <div id="manualOut" class="hidden">
+      <details open>
+        <summary>Manual steps — follow in order</summary>
+        <ol class="steps">
+          <li>Tap <b>Download photo</b> below — it saves a web-ready copy of your pic.</li>
+          <li>On GitHub, open your repo → <b>images</b> folder → <b>Add file → Upload files</b> → upload that photo → green <b>Commit changes</b> button.</li>
+          <li>Tap <b>Copy item code</b> below.</li>
+          <li>On GitHub, open <b>products.js</b> → tap the <b>✏️ pencil</b> → find the line that says <code>NEW ITEMS GET ADDED RIGHT BELOW THIS LINE</code> → paste on the line under it → green <b>Commit changes</b>.</li>
+          <li>Wait ~1 minute, refresh the store. Done 🎉</li>
+        </ol>
+      </details>
+      <a class="btn ghost" id="btnDlPhoto">⬇ DOWNLOAD PHOTO</a>
+      <button class="btn ghost" id="btnCopyCode">📋 COPY ITEM CODE</button>
+      <textarea class="code" id="codeOut" readonly spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <!-- ═══ MANAGE ITEMS ═══ -->
+  <div class="panel">
+    <h2>📦 Current Inventory</h2>
+    <p class="note" id="manageNote"></p>
+    <div id="itemList"></div>
+  </div>
+
+  <!-- ═══ INSTANT PUBLISH SETUP ═══ -->
+  <div class="panel">
+    <h2>⚡ Instant Publish — one-time setup</h2>
+    <p class="note">Do this once and “PUBLISH TO SITE”, “MARK SOLD”, and “DELETE” all work with one tap — no copy-pasting ever again. It uses a free GitHub “token” (like a spare key to your repo that only works from this page).</p>
+    <details>
+      <summary>How to get your token (2 minutes)</summary>
+      <ol class="steps">
+        <li>On GitHub (logged in), go to <b>github.com/settings/personal-access-tokens</b> → <b>Generate new token</b>.</li>
+        <li>Name it <code>rips-admin</code>. Expiration: <b>90 days</b> (you'll make a fresh one when it expires).</li>
+        <li>Under <b>Repository access</b> choose <b>Only select repositories</b> → pick your store repo.</li>
+        <li>Under <b>Permissions → Repository permissions</b> find <b>Contents</b> → set to <b>Read and write</b>.</li>
+        <li>Tap <b>Generate token</b>, copy the long code that starts with <code>github_pat_</code>, paste it below.</li>
+      </ol>
+    </details>
+    <label>GitHub username</label>
+    <input type="text" id="ghOwner" placeholder="ripscloset">
+    <label>Repo name</label>
+    <input type="text" id="ghRepo" placeholder="rips-store">
+    <label>Token</label>
+    <input type="password" id="ghToken" placeholder="github_pat_...">
+    <button class="btn green" id="btnSaveGh">SAVE SETUP</button>
+    <div class="msg" id="ghMsg"></div>
+    <p class="note">🔐 The token is saved only in this browser on this phone/computer. Your partner does the same setup once on their device with their own token.</p>
+  </div>
+</div>
+
+<script src="products.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN LOGIC — no need to edit below this line.
+   ═══════════════════════════════════════════════════════════════ */
+document.documentElement.style.setProperty('--green', SETTINGS.COLOR_GREEN);
+
+// ── Admin login ──
+const gate = document.getElementById('gate'), app = document.getElementById('app');
+function unlock(){ gate.classList.add('hidden'); app.classList.remove('hidden'); }
+if (sessionStorage.getItem('rips_admin') === 'yes') unlock();
+function tryLogin(){
+  if (document.getElementById('gateInput').value === SETTINGS.ADMIN_PASSWORD){
+    sessionStorage.setItem('rips_admin','yes'); unlock();
+  } else document.getElementById('gateErr').textContent = 'NOPE — WRONG PASSWORD';
+}
+document.getElementById('gateBtn').onclick = tryLogin;
+document.getElementById('gateInput').addEventListener('keydown', e => { if (e.key==='Enter') tryLogin(); });
+
+// ── GitHub setup (saved on this device only) ──
+const gh = {
+  get owner(){ return localStorage.getItem('gh_owner') || ''; },
+  get repo(){ return localStorage.getItem('gh_repo') || ''; },
+  get token(){ return localStorage.getItem('gh_token') || ''; },
+  ready(){ return this.owner && this.repo && this.token; }
+};
+document.getElementById('ghOwner').value = gh.owner;
+document.getElementById('ghRepo').value = gh.repo;
+document.getElementById('ghToken').value = gh.token;
+document.getElementById('btnSaveGh').onclick = async () => {
+  localStorage.setItem('gh_owner', document.getElementById('ghOwner').value.trim());
+  localStorage.setItem('gh_repo', document.getElementById('ghRepo').value.trim());
+  localStorage.setItem('gh_token', document.getElementById('ghToken').value.trim());
+  const m = document.getElementById('ghMsg');
+  m.className = 'msg'; m.textContent = 'Checking...'; m.classList.add('ok');
+  try {
+    const r = await ghApi(`contents/products.js`);
+    if (r.sha){ m.className='msg ok'; m.textContent='✅ Connected! Instant publish is ON.'; refreshManageNote(); }
+    else throw new Error();
+  } catch(e){
+    m.className='msg err';
+    m.textContent = '❌ Could not connect. Double-check the username, repo name, and token (Contents permission must be Read and write).';
+  }
+};
+
+// ── GitHub API helpers ──
+async function ghApi(path, opts = {}){
+  const res = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/${path}`, {
+    ...opts,
+    headers: {
+      'Authorization': `Bearer ${gh.token}`,
+      'Accept': 'application/vnd.github+json',
+      ...(opts.body ? {'Content-Type':'application/json'} : {})
+    }
+  });
+  if (!res.ok && res.status !== 404) throw new Error('GitHub said: ' + res.status);
+  return res.json();
+}
+const enc = s => btoa(unescape(encodeURIComponent(s)));
+const dec = b => decodeURIComponent(escape(atob(b.replace(/\s/g,''))));
+
+async function getProductsFile(){
+  const f = await ghApi('contents/products.js');
+  return { text: dec(f.content), sha: f.sha };
+}
+async function putFile(path, base64, message, sha){
+  return ghApi(`contents/${path}`, {
+    method:'PUT',
+    body: JSON.stringify({ message, content: base64, ...(sha ? {sha} : {}) })
+  });
+}
+
+// ── Photo picking + shrinking (makes pics fast-loading) ──
+let photoData = null; // { base64, ext }
+const drop = document.getElementById('photoDrop');
+const fileInput = document.getElementById('fPhoto');
+drop.onclick = () => fileInput.click();
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 1200;
+    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * scale);
+    c.height = Math.round(img.height * scale);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const dataUrl = c.toDataURL('image/jpeg', 0.85);
+    photoData = { base64: dataUrl.split(',')[1], ext: 'jpg', dataUrl };
+    const prev = document.getElementById('photoPreview');
+    prev.src = dataUrl; prev.classList.remove('hidden');
+    document.getElementById('photoHint').textContent = '✅ Photo ready — tap to change';
+  };
+  img.src = URL.createObjectURL(file);
+};
+
+// ── Build the item code block ──
+const newId = () => Date.now().toString(36) + Math.floor(Math.random()*36).toString(36);
+function buildBlock(id, v){
+  return `
+  // ═══ ITEM: ${v.name.replace(/[=\n]/g,'')} ═══ [id:${id}]
+  {
+    id: "${id}",
+    name: "${v.name}",
+    price: "${v.price}",
+    size: "${v.size}",
+    condition: "${v.cond}",
+    image: "images/${id}.${v.ext}",
+    soldOut: ${v.sold},                       // 👈 change to true when it sells
+  },
+  // ═══ END ITEM ═══ [end:${id}]
+`;
+}
+function readForm(){
+  const name = document.getElementById('fName').value.trim().replace(/"/g,"'");
+  const price = document.getElementById('fPrice').value.trim().replace(/"/g,"'");
+  if (!name || !price) return { err: 'Item name and price are required.' };
+  if (!photoData) return { err: 'Add a photo first 📸' };
+  return {
+    name, price,
+    size: document.getElementById('fSize').value.trim().replace(/"/g,"'"),
+    cond: document.getElementById('fCond').value.trim().replace(/"/g,"'"),
+    sold: document.getElementById('fSold').checked,
+    ext: photoData.ext
+  };
+}
+const MARKER = 'NEW ITEMS GET ADDED RIGHT BELOW THIS LINE';
+function say(el, ok, text){ el.className = 'msg ' + (ok?'ok':'err'); el.textContent = text; }
+const addMsg = document.getElementById('addMsg');
+
+// ── ⚡ Instant publish ──
+document.getElementById('btnPublish').onclick = async () => {
+  const v = readForm();
+  if (v.err) return say(addMsg, false, v.err);
+  if (!gh.ready()) return say(addMsg, false, 'Instant publish isn\u2019t set up yet — scroll down to “one-time setup”, or use Manual Mode.');
+  const btn = document.getElementById('btnPublish');
+  btn.disabled = true; say(addMsg, true, 'Publishing... hang tight ⏳');
+  try {
+    const id = newId();
+    await putFile(`images/${id}.${v.ext}`, photoData.base64, `Add photo: ${v.name}`);
+    const pf = await getProductsFile();
+    const idx = pf.text.indexOf(MARKER);
+    if (idx === -1) throw new Error('marker missing');
+    const lineEnd = pf.text.indexOf('\n', idx) + 1;
+    const updated = pf.text.slice(0, lineEnd) + buildBlock(id, v) + pf.text.slice(lineEnd);
+    await putFile('products.js', enc(updated), `Add item: ${v.name}`, pf.sha);
+    say(addMsg, true, `✅ "${v.name}" is live! Give it ~1 minute, then refresh the store.`);
+    clearForm();
+  } catch(e){
+    say(addMsg, false, '❌ Publish failed — check your internet + token setup below, or use Manual Mode.');
+  }
+  btn.disabled = false;
+};
+
+// ── ✍️ Manual mode ──
+document.getElementById('btnManual').onclick = () => {
+  const v = readForm();
+  if (v.err) return say(addMsg, false, v.err);
+  const id = newId();
+  document.getElementById('codeOut').value = buildBlock(id, v).trim();
+  const dl = document.getElementById('btnDlPhoto');
+  dl.href = photoData.dataUrl;
+  dl.download = `${id}.${v.ext}`;
+  document.getElementById('manualOut').classList.remove('hidden');
+  say(addMsg, true, 'Code + photo are ready below 👇 Follow the steps in order.');
+};
+document.getElementById('btnCopyCode').onclick = () => {
+  navigator.clipboard.writeText(document.getElementById('codeOut').value);
+  say(addMsg, true, '📋 Copied! Now paste it into products.js on GitHub (step 4).');
+};
+function clearForm(){
+  ['fName','fPrice','fSize','fCond'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('fSold').checked = false;
+  photoData = null;
+  document.getElementById('photoPreview').classList.add('hidden');
+  document.getElementById('photoHint').textContent = '📸 Tap to choose a photo';
+  document.getElementById('manualOut').classList.add('hidden');
+}
+
+// ── 📦 Manage current items ──
+function refreshManageNote(){
+  document.getElementById('manageNote').textContent = gh.ready()
+    ? 'Tap a button to flip sold-out or delete — changes go live in about a minute.'
+    : 'Buttons here need Instant Publish set up. Without it: open products.js on GitHub and change soldOut: false → true by hand.';
+}
+refreshManageNote();
+const listEl = document.getElementById('itemList');
+function renderList(){
+  listEl.innerHTML = '';
+  if (!PRODUCTS.length){ listEl.innerHTML = '<p class="note">No items yet — add your first drop above 🔥</p>'; return; }
+  for (const p of PRODUCTS){
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.innerHTML = `
+      <img src="${p.image}" onerror="this.style.visibility='hidden'">
+      <div class="t"><b>${p.name}</b><small>${p.price}${p.size ? ' · ' + p.size : ''} ${p.soldOut ? '· <span class=sold-badge>SOLD</span>' : ''}</small></div>
+      <button class="mini" data-act="toggle" data-id="${p.id}">${p.soldOut ? 'BACK IN STOCK' : 'MARK SOLD'}</button>
+      <button class="mini danger" data-act="del" data-id="${p.id}">DELETE</button>`;
+    listEl.appendChild(row);
+  }
+}
+renderList();
+listEl.addEventListener('click', async e => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  const id = btn.dataset.id, act = btn.dataset.act;
+  if (!gh.ready()) return alert('Set up Instant Publish first (bottom of this page), or edit products.js on GitHub by hand.');
+  if (act === 'del' && !confirm('Delete this item from the store for good?')) return;
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const pf = await getProductsFile();
+    let text = pf.text;
+    const start = text.indexOf(`[id:${id}]`);
+    const end = text.indexOf(`[end:${id}]`);
+    if (start === -1 || end === -1) throw new Error('block not found');
+    const blockStart = text.lastIndexOf('\n', start);
+    const blockEnd = text.indexOf('\n', end) + 1;
+    let block = text.slice(blockStart, blockEnd);
+    let msg;
+    if (act === 'toggle'){
+      block = /soldOut:\s*false/.test(block)
+        ? block.replace(/soldOut:\s*false/, 'soldOut: true')
+        : block.replace(/soldOut:\s*true/, 'soldOut: false');
+      text = text.slice(0, blockStart) + block + text.slice(blockEnd);
+      msg = 'Toggle sold-out';
+    } else {
+      text = text.slice(0, blockStart) + text.slice(blockEnd);
+      msg = 'Delete item';
+    }
+    await putFile('products.js', enc(text), msg, pf.sha);
+    // update the page in place
+    const p = PRODUCTS.find(x => x.id === id);
+    if (act === 'toggle' && p) p.soldOut = !p.soldOut;
+    if (act === 'del'){ const i = PRODUCTS.findIndex(x => x.id === id); if (i > -1) PRODUCTS.splice(i,1); }
+    renderList();
+  } catch(err){
+    alert('That didn\u2019t go through — check your internet + token, then try again.');
+    renderList();
+  }
+});
+</script>
+</body>
+</html>
