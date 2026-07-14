@@ -72,6 +72,18 @@ const SETTINGS = {
 const PRODUCTS = [
   // ⬇️⬇️⬇️ NEW ITEMS GET ADDED RIGHT BELOW THIS LINE (do not delete this line) ⬇️⬇️⬇️
 
+  // ═══ ITEM: Hellstar T Creme ═══ [id:mrk0w1u6u]
+  {
+    id: "mrk0w1u6u",
+    name: "Hellstar T Creme",
+    price: "$40",
+    size: "L",
+    condition: "New, Never Worn",
+    image: "images/mrk0w1u6u.jpg",
+    soldOut: false,                       // 👈 change to true when it sells
+  },
+  // ═══ END ITEM ═══ [end:mrk0w1u6u]
+
   // ═══ ITEM: Example Hoodie ═══ [id:demo1]
   {
     id: "demo1",
