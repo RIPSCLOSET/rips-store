@@ -80,7 +80,7 @@ const PRODUCTS = [
     size: "L",                            // size — leave "" if none
     condition: "9/10",                    // condition — leave "" to hide
     image: "images/demo1.jpg",            // photo file inside images folder
-    soldOut: false,                       // 👈 change to true when it sells
+    soldOut: true,                       // 👈 change to true when it sells
   },
   // ═══ END ITEM ═══ [end:demo1]
 
